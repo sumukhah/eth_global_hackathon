@@ -39,14 +39,42 @@ const formItemLayout = {
 };
 
 export default function CreateCollection() {
-  const { data, fetch, setData } = useWeb3ExecuteFunction();
-  // const { data, error, runContractFunction, isFetching, isLoading } =
-  // useApiContract({
+  // const options = {
+  //   abi: nftAbi,
+  //   contractAddress: process.env.REACT_APP_NFTC_PROXY_ADDRESS,
+  //   functionName: "createDropCollection",
+  //   function_name: "createDropCollection",
+  //   chain: "mumbai",
+  // };
+
+  const options = {
+    abi: nftAbi,
+    contractAddress: process.env.REACT_APP_NFTC_PROXY_ADDRESS,
+    functionName: "createDropCollection",
+    function_name: "createDropCollection",
+    chain: "mumbai",
+    params: {
+      name: "FD",
+      symbol: "GD",
+      treasury: "0x464e3f471628e162fa34f130f4c3bcc41ff7635d",
+      royalty: "0x464e3f471628e162fa34f130f4c3bcc41ff7635d",
+      royaltyFee: 1,
+    },
+  };
+
+  const { data, error, fetch, isFetching, isLoading, setData } =
+    useWeb3ExecuteFunction(options);
+  // const { native } = useMoralisWeb3Api();
+  // const { data, fetch, setData } = useWeb3ExecuteFunction(
+  //   native.runContractFunction,
+  //   { ...options }
+  // );
+
+  // const { runContractFunction, data } = useWeb3Contract({
   //   abi: nftAbi,
   //   functionName: "owner",
   //   address: "0xd8Ad6001551Ced68c536De41F18C575185d49738",
   //   chain: "mumbai",
-  //   params: [],
   // });
   // const { userWallet } = useContext(walletContext);
 
@@ -72,22 +100,25 @@ export default function CreateCollection() {
   };
 
   const submitForm = async (values) => {
-    const params = {
-      royalty: values.royaltyAddress,
-      name: values.collectionName,
-      treasury: values.collectionTreasuryAddress,
-      royaltyFees: values.royaltyFees,
-      symbol: values.symbol,
-    };
-    console.log(params, "params");
+    options.params.name = values.collectionName;
+    options.params.symbol = values.symbol;
+    options.params.treasury = values.collectionTreasuryAddress;
+    options.params.royalty = values.royaltyAddress;
+    options.params.royaltyFee = values.royaltyFees;
+
+    // const params = {
+    //   royalty: values.royaltyAddress,
+    //   name: values.collectionName,
+    //   treasury: values.collectionTreasuryAddress,
+    //   royaltyFees: values.royaltyFees,
+    //   symbol: values.symbol,
+    // };
+    // setData({ ...options, params });
+    // console.log(params, "params");
 
     try {
-      await fetch({
-        abi: nftAbi,
-        contractAddress: process.env.REACT_APP_NFTC_PROXY_ADDRESS,
-        functionName: "createDropCollection",
-        params,
-      });
+      // await runContractFunction(params);
+      await fetch();
       console.log(data, "here is the data after the transaction");
       const transactionHash = data.hash;
       fetchContractAddress(transactionHash);
