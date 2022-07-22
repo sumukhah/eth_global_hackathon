@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import "./CreateCollection.css";
 
-import { Button, Form, Input, Upload } from "antd";
+import { Button, Form, Input, Upload, Typography } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
 import firebase from "../../firebase/config";
 import { walletContext } from "../../context/index";
@@ -18,6 +18,7 @@ import useNftContract from "../../hooks/useNftContract";
 import axios from "axios";
 
 const { Dragger } = Upload;
+const { Title } = Typography;
 
 const formItemLayout = {
   labelCol: {
@@ -39,6 +40,8 @@ const formItemLayout = {
 };
 
 export default function CreateCollection() {
+  const { userWallet } = useContext(walletContext);
+  console.log(userWallet, "user wallet");
   // const options = {
   //   abi: nftAbi,
   //   contractAddress: process.env.REACT_APP_NFTC_PROXY_ADDRESS,
@@ -93,7 +96,17 @@ export default function CreateCollection() {
         `https://api-testnet.polygonscan.com/api?module=account&action=txlistinternal&txhash=${transactionHash}&apikey=${process.env.REACT_APP_POLYGON_SCAN_API_KEY}`
       );
       console.log(response);
-      console.log(response.data.result[0].contractAddress);
+      if (response.data.result.length < 1) {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        return fetchContractAddress(transactionHash);
+      } else {
+        console.log(response.data.result[0].contractAddress);
+        firebase
+          .getApp()
+          .database()
+          .ref("hackathon-project")
+          .push({ collection: response.data.result[0].contractAddress });
+      }
     } catch (e) {
       console.log(e);
     }
@@ -128,6 +141,9 @@ export default function CreateCollection() {
   };
   return (
     <div className="collection-form-container">
+      <Title className="collection-form-title" level={1}>
+        Create a collection
+      </Title>
       <Form
         {...formItemLayout}
         className="create-collection-form"
@@ -139,10 +155,7 @@ export default function CreateCollection() {
         <Form.Item name="symbol" label="symbol">
           <Input />
         </Form.Item>
-        <Form.Item
-          name="collectionTreasuryAddress"
-          label="address for collection treasury"
-        >
+        <Form.Item name="collectionTreasuryAddress" label="treasury address">
           <Input />
         </Form.Item>
         <Form.Item name="royaltyAddress" label="royalty address">

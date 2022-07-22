@@ -6,7 +6,8 @@ import "./App.css";
 import { Header } from "./components/index";
 import { walletContext } from "./context/index";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { CreateCollection } from "./pages/index";
+import { CreateCollection, CreateTable, UploadImages } from "./pages/index";
+
 // import Web3 from "web3";
 import { MoralisProvider, useMoralis } from "react-moralis";
 // import firebaseConfig from "./firebase/config";
@@ -47,14 +48,14 @@ function App() {
     enableWeb3();
   }, []);
 
-  console.log(isWeb3Enabled);
-
   return (
     <walletContext.Provider value={{ userWallet, setUserWallet }}>
       <BrowserRouter>
         <Header>
           <Routes>
             <Route path="/create-collection" element={<CreateCollection />} />
+            <Route path="/create-table" element={<CreateTable />} />
+            <Route path="/upload-images/*" element={<UploadImages />} />
           </Routes>
         </Header>
       </BrowserRouter>

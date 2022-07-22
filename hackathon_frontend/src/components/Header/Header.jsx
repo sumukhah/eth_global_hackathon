@@ -15,12 +15,14 @@ export default function Header(props) {
       await logout();
       setUserWallet({});
       return;
+    } else {
+      const response = await authenticate();
+      console.log(response);
+      setUserWallet(user);
     }
-    await authenticate();
-    setUserWallet(user);
   };
   return (
-    <div>
+    <div className="page-container">
       <div className="header-container">
         <div>
           <span>icon</span>
