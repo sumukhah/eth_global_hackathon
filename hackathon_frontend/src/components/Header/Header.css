@@ -7,7 +7,7 @@
   padding: 10px 100px 10px 100px;
   align-items: center;
   background-color: #f5f5f5;
-  box-shadow: rgba(59, 59, 59, 0.56) 0px 22px 70px 4px inset;
+  box-shadow: rgba(59, 59, 59, 0.2) 0px 22px 70px 4px inset;
 }
 
 .wallet-button {
