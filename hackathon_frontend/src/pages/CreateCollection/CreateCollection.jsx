@@ -1,20 +1,25 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import "./CreateCollection.css";
 
 import { Button, Form, Input, Upload, Typography } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
-import firebase from "../../firebase/config";
+
+// import firebase from "../../firebase/config";
+import { getDatabase, ref, set } from "firebase/database";
+import { db, firebaseApp } from "../../firebase/config";
 import { walletContext } from "../../context/index";
-import {
-  useMoralisWeb3Api,
-  useMoralisWeb3ApiCall,
-  useWeb3Contract,
-  useApiContract,
-  useWeb3ExecuteFunction,
-} from "react-moralis";
+import nftContract from "../../web3/nftContract";
+import { useNavigate, Link } from "react-router-dom";
+// import {
+//   useMoralisWeb3Api,
+//   useMoralisWeb3ApiCall,
+//   useWeb3Contract,
+//   useApiContract,
+//   useWeb3ExecuteFunction,
+// } from "react-moralis";
 
 import nftAbi from "../../abi/nftc.json";
-import useNftContract from "../../hooks/useNftContract";
+// import useNftContract from "../../hooks/useNftContract";
 import axios from "axios";
 
 const { Dragger } = Upload;
@@ -42,6 +47,8 @@ const formItemLayout = {
 export default function CreateCollection() {
   const { userWallet } = useContext(walletContext);
   console.log(userWallet, "user wallet");
+  const navigate = useNavigate();
+
   // const options = {
   //   abi: nftAbi,
   //   contractAddress: process.env.REACT_APP_NFTC_PROXY_ADDRESS,
@@ -65,8 +72,8 @@ export default function CreateCollection() {
     },
   };
 
-  const { data, error, fetch, isFetching, isLoading, setData } =
-    useWeb3ExecuteFunction(options);
+  // const { data, error, fetch, isFetching, isLoading, setData } =
+  //   useWeb3ExecuteFunction(options);
   // const { native } = useMoralisWeb3Api();
   // const { data, fetch, setData } = useWeb3ExecuteFunction(
   //   native.runContractFunction,
@@ -100,12 +107,7 @@ export default function CreateCollection() {
         await new Promise((resolve) => setTimeout(resolve, 5000));
         return fetchContractAddress(transactionHash);
       } else {
-        console.log(response.data.result[0].contractAddress);
-        firebase
-          .getApp()
-          .database()
-          .ref("hackathon-project")
-          .push({ collection: response.data.result[0].contractAddress });
+        return response.data.result[0].contractAddress;
       }
     } catch (e) {
       console.log(e);
@@ -113,11 +115,38 @@ export default function CreateCollection() {
   };
 
   const submitForm = async (values) => {
-    options.params.name = values.collectionName;
-    options.params.symbol = values.symbol;
-    options.params.treasury = values.collectionTreasuryAddress;
-    options.params.royalty = values.royaltyAddress;
-    options.params.royaltyFee = values.royaltyFees;
+    const {
+      collectionName,
+      symbol,
+      collectionTreasuryAddress,
+      royaltyAddress,
+      royaltyFees,
+    } = values;
+    const res = await nftContract.methods
+      .createDropCollection(
+        collectionName,
+        symbol,
+        collectionTreasuryAddress,
+        royaltyAddress,
+        royaltyFees
+      )
+      .send({ from: userWallet });
+
+    const collectionAddress = await fetchContractAddress(res.transactionHash);
+    // await set(ref(db, "collections/" + collectionAddress), {
+    //   owner: userWallet,
+    //   address: collectionAddress,
+    //   time: new Date().toISOString(),
+    // });
+    console.log(collectionAddress, "collection address");
+    return navigate("/create-table", { state: { collectionAddress } });
+
+    // const res = await nftContract
+    //   .getFees(["0xc9A7Eae76A98b8CC557D70bB3Db4e5D834d2864B"])
+    //   .call();
+    // const res = await nftContract.methods
+    //   .createDropCollection(options.params)
+    //   .send({ from: userWallet });
 
     // const params = {
     //   royalty: values.royaltyAddress,
@@ -131,10 +160,10 @@ export default function CreateCollection() {
 
     try {
       // await runContractFunction(params);
-      await fetch();
-      console.log(data, "here is the data after the transaction");
-      const transactionHash = data.hash;
-      fetchContractAddress(transactionHash);
+      // await fetch();
+      // console.log(data, "here is the data after the transaction");
+      // const transactionHash = data.hash;
+      // fetchContractAddress(transactionHash);
     } catch (e) {
       console.log(e);
     }
@@ -144,6 +173,7 @@ export default function CreateCollection() {
       <Title className="collection-form-title" level={1}>
         Create a collection
       </Title>
+
       <Form
         {...formItemLayout}
         className="create-collection-form"
@@ -217,6 +247,14 @@ export default function CreateCollection() {
           <Button htmlType="submit">Submit</Button>
         </Form.Item>
       </Form>
+      {/* <Link
+        to="/create-table"
+        state={{
+          collectionAddress: "0x861c61e5ed8ab04fdccc1e400c372def24cf3dda",
+        }}
+      >
+        Click here
+      </Link> */}
     </div>
   );
 }

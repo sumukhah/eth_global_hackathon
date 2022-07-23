@@ -5,7 +5,7 @@ import "antd/dist/antd.variable.min.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { ConfigProvider } from "antd";
-import { MoralisProvider } from "react-moralis";
+import "./polyfill";
 
 ConfigProvider.config({
   theme: {
@@ -16,12 +16,7 @@ ConfigProvider.config({
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <MoralisProvider
-      appId="LnkwfCJMIhZJtvpLBR9BnlzVU48NMhOs20FP4epF"
-      serverUrl="https://ikimg4jikowe.usemoralis.com:2053/server"
-    >
-      <App />
-    </MoralisProvider>
+    <App />
   </React.StrictMode>
 );
 

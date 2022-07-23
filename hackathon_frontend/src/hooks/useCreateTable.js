@@ -23,7 +23,7 @@ const useCreateTable = () => {
     connectTableLand();
   }, []);
 
-  debugger;
+  // debugger;
   // Define the table's schema
   const mainSchema = `id int, name text, description text, image text, primary key (id)`;
   // Should have one `main` row (a token) to many `attributes`, so no need to introduce a primary key constraint

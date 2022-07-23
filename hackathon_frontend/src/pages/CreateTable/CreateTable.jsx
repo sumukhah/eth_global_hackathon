@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import "./CreateTable.css";
 
 import { Button, Form, Input, Upload, Typography } from "antd";
@@ -6,13 +6,22 @@ import useCreateTable from "../../hooks/useCreateTable";
 import { InboxOutlined } from "@ant-design/icons";
 import firebase from "../../firebase/config";
 import { walletContext } from "../../context/index";
-import {
-  useMoralisWeb3Api,
-  useMoralisWeb3ApiCall,
-  useWeb3Contract,
-  useApiContract,
-  useWeb3ExecuteFunction,
-} from "react-moralis";
+import { useLocation } from "react-router-dom";
+import prepareSqlStatement from "../../utils/prepareSqlStatement";
+import writeTable from "../../utils/writeTable";
+import { db } from "../../firebase/config";
+import { getDatabase, ref, set } from "firebase/database";
+import web3 from "../../web3";
+import dropCollectionAbi from "../../abi/dropCollection.json";
+// import nftContract from "../../web3/nftContract.js";
+
+// import {
+//   useMoralisWeb3Api,
+//   useMoralisWeb3ApiCall,
+//   useWeb3Contract,
+//   useApiContract,
+//   useWeb3ExecuteFunction,
+// } from "react-moralis";
 
 import nftAbi from "../../abi/nftc.json";
 import useNftContract from "../../hooks/useNftContract";
@@ -47,7 +56,17 @@ export default function CreateTable() {
     initiateTableLand,
     tableConfig,
   } = useCreateTable();
-  const { wallet } = useContext(walletContext);
+  const { userWallet } = useContext(walletContext);
+  const location = useLocation();
+  const { collectionAddress } = location.state || {
+    collectionAddress: "0x861c61e5ed8ab04fdccc1e400c372def24cf3dda",
+  };
+  const [collectionContract, setCollectionContract] = useState(null);
+  const [tableNames, setTableNames] = useState({
+    mainTable: "",
+    attributeTable: "",
+  });
+
   // const options = {
   //   abi: nftAbi,
   //   contractAddress: process.env.REACT_APP_NFTC_PROXY_ADDRESS,
@@ -102,13 +121,39 @@ export default function CreateTable() {
 
   const submitForm = async (values) => {
     try {
+      console.log("creating table");
       let { mainTableHash, mainTableName } = await createMainTable(
         values.mainTableName
       );
+
       let { attributeTableName, attributeTableHash } =
         await createAttributeTable(values.attributeTableName);
+
+      setTableNames({
+        mainTable: mainTableName,
+        attributeTable: attributeTableName,
+      });
+
       console.log(mainTableHash, mainTableName, "mainTableHash, mainTableName");
       console.log(attributeTableHash, attributeTableName, "attributeTableHash");
+
+      console.log("writing table");
+      const sql = await prepareSqlStatement(mainTableName, attributeTableName);
+      const response = await writeTable(sql);
+      await set(ref(db, "collections/" + collectionAddress), {
+        owner: userWallet,
+        address: collectionAddress,
+        time: new Date().toISOString(),
+        mainTable: { hash: mainTableHash, name: mainTableName },
+        attributeTable: { hash: attributeTableHash, name: attributeTableName },
+      });
+      const dropCollectionContract = new web3.eth.Contract(
+        dropCollectionAbi,
+        collectionAddress
+      );
+      setCollectionContract(dropCollectionContract);
+
+      console.log(response, "response");
     } catch (e) {
       console.log(e);
     }
@@ -126,6 +171,29 @@ export default function CreateTable() {
     // } catch (e) {
     //   console.log(e);
     // }
+  };
+
+  const updateAndMint = async () => {
+    try {
+      collectionContract.methods
+        .setBaseUri(tableNames.mainTable, tableNames.attributeTable)
+        .send({ from: userWallet });
+
+      mint();
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const mint = async () => {
+    try {
+      const response = await collectionContract.methods
+        .mint()
+        .send({ from: userWallet });
+      console.log(response, "response from mint");
+    } catch (e) {
+      console.log(e);
+    }
   };
   return (
     <div className="collection-form-container">
@@ -162,6 +230,7 @@ export default function CreateTable() {
           <Button htmlType="submit">Submit</Button>
         </Form.Item>
       </Form>
+      <Button onClick={updateAndMint}>Update table name & mint</Button>
     </div>
   );
 }

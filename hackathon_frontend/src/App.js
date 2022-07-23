@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 // import Web3 from "web3";
-// import { MoralisProvider } from "react-moralis";
 
 import { Header } from "./components/index";
 import { walletContext } from "./context/index";
@@ -9,20 +8,12 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { CreateCollection, CreateTable, UploadImages } from "./pages/index";
 
 // import Web3 from "web3";
-import { MoralisProvider, useMoralis } from "react-moralis";
+
 // import firebaseConfig from "./firebase/config";
 // import nftcJson from "./abi/nftc.json";
 
 function App() {
-  const {
-    web3,
-    enableWeb3,
-    isWeb3Enabled,
-    isWeb3EnableLoading,
-    web3EnableError,
-  } = useMoralis();
-
-  const [userWallet, setUserWallet] = useState({});
+  const [userWallet, setUserWallet] = useState();
   // const [account, setAccount] = useState();
   // const [web3, setWeb3Instance] = useState();
   // const [contract, setContract] = useState();
@@ -44,8 +35,6 @@ function App() {
       // setContract(contract);
       // setAccount(accounts[0]);
     }
-    load();
-    enableWeb3();
   }, []);
 
   return (
