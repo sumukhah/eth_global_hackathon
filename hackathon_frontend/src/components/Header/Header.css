@@ -20,6 +20,9 @@
   flex-direction: row;
   align-items: center;
 }
+.right-header-section > * {
+  margin-left: 20px;
+}
 
 .content-container {
   width: 100%;

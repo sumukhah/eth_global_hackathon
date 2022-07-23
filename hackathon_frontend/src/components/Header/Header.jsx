@@ -35,6 +35,7 @@ export default function Header(props) {
           <img src={ethWing} style={{ maxHeight: "40px" }} />
         </Link>
         <div className="right-header-section">
+          <Link to="/home">Home</Link>
           <Link to="/create-collection">Create collection</Link>
           <Button
             type="primary"
