@@ -1,0 +1,69 @@
+.collection-content-page {
+  padding-inline: 50px;
+  margin-top: 20px;
+}
+.carousel-background-containr {
+  /* max-width: 100%; */
+  display: flex;
+  flex-direction: row;
+  height: 200px;
+  width: 100%;
+  /* padding-inline: 100px; */
+}
+
+.carousel-image {
+  width: 100%;
+  /* height: 200px;
+  width: 200px; */
+}
+
+.carousel-background-container {
+  display: flex;
+  flex-direction: row;
+  padding: 0px !important;
+  margin-inline: 150px;
+  /* width: 100vw; */
+
+  /* background-color: rgb(204, 200, 195); */
+
+  /*rgb(0, 0, 0)
+  /* width: 100%; */
+}
+.about-collection {
+  width: 100%;
+  margin-left: 70px;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-collection > * {
+  margin-top: 10px;
+}
+
+.collection-name {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  /* color: white; */
+}
+
+.nft-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  /* justify-content: space-around; */
+  margin-top: 20px;
+}
+.nft-container > * {
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+
+.minted-nfts {
+  margin-top: 50px;
+  margin-inline: 50px;
+}
+
+/* .ant-carousel {
+  width: 100%;
+} */

@@ -46,7 +46,6 @@ const formItemLayout = {
 
 export default function CreateCollection() {
   const { userWallet } = useContext(walletContext);
-  console.log(userWallet, "user wallet");
   const navigate = useNavigate();
 
   // const options = {
@@ -104,7 +103,8 @@ export default function CreateCollection() {
       );
       console.log(response);
       if (response.data.result.length < 1) {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        console.log(response, response.data);
         return fetchContractAddress(transactionHash);
       } else {
         return response.data.result[0].contractAddress;
@@ -131,7 +131,7 @@ export default function CreateCollection() {
         royaltyFees
       )
       .send({ from: userWallet });
-
+    console.log(res);
     const collectionAddress = await fetchContractAddress(res.transactionHash);
     // await set(ref(db, "collections/" + collectionAddress), {
     //   owner: userWallet,

@@ -3,9 +3,18 @@ import "./App.css";
 // import Web3 from "web3";
 
 import { Header } from "./components/index";
-import { walletContext } from "./context/index";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { CreateCollection, CreateTable, UploadImages } from "./pages/index";
+import { walletContext, collectionContext } from "./context/index";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import {
+  CreateCollection,
+  CreateTable,
+  HomePage,
+  CollectionDetail,
+} from "./pages/index";
+import { db } from "./firebase/config";
+import { getDatabase, child, set, get, onValue, ref } from "firebase/database";
+import web3 from "./web3/index";
+import dropCollectionAbi from "./abi/dropCollection.json";
 
 // import Web3 from "web3";
 
@@ -14,12 +23,23 @@ import { CreateCollection, CreateTable, UploadImages } from "./pages/index";
 
 function App() {
   const [userWallet, setUserWallet] = useState();
+  const [collectionData, setCollectionData] = useState({});
+
   // const [account, setAccount] = useState();
   // const [web3, setWeb3Instance] = useState();
   // const [contract, setContract] = useState();
 
   useEffect(() => {
     async function load() {
+      try {
+        onValue(ref(db, "collections/"), (snapshot) => {
+          const data = snapshot.val();
+          setCollectionData(data);
+        });
+      } catch (e) {
+        console.log(e);
+      }
+
       // const web3 = new Web3(MoralisProvider.);
       //   Web3.givenProvider(
       //     "https://mainnet.infura.io/v3/ZiPX0JtXnVqQ56RGdvdy8mvCOs4ZDchO"
@@ -35,19 +55,27 @@ function App() {
       // setContract(contract);
       // setAccount(accounts[0]);
     }
+    load();
   }, []);
 
   return (
     <walletContext.Provider value={{ userWallet, setUserWallet }}>
-      <BrowserRouter>
-        <Header>
-          <Routes>
-            <Route path="/create-collection" element={<CreateCollection />} />
-            <Route path="/create-table" element={<CreateTable />} />
-            <Route path="/upload-images/*" element={<UploadImages />} />
-          </Routes>
-        </Header>
-      </BrowserRouter>
+      <collectionContext.Provider value={{ collectionData, setCollectionData }}>
+        <BrowserRouter>
+          <Header>
+            <Routes>
+              <Route path="/create-collection" element={<CreateCollection />} />
+              <Route path="/create-table" element={<CreateTable />} />
+              <Route path="/home" element={<HomePage />} />
+              <Route
+                path="/collection/:collectionId"
+                element={<CollectionDetail />}
+              />
+              <Route path="/*" element={<Navigate to="/home" />} />
+            </Routes>
+          </Header>
+        </BrowserRouter>
+      </collectionContext.Provider>
     </walletContext.Provider>
   );
 }

@@ -1,30 +1,34 @@
 // const prepareMetadata = require("./useUploadMetadataToIpfs").default;
+const defaultMetadata = [
+  {
+    id: 1,
+    name: "TableNFT Rigs #0",
+    description: "A Tableland NFT demo -- deploying metadata on Tableland",
+    image:
+      "https://bafkreibijrzbzy44dxmroq7jvbtka4oxgrejdtzsgu2qqsiugeb3he56pi.ipfs.nftstorage.link/",
+    attributes: [
+      {
+        trait_type: "Fleet",
+        value: "Foils",
+      },
+      {
+        trait_type: "Role",
+        value: "Admin",
+      },
+    ],
+  },
+];
 
-export default async (mainTable, attributesTable) => {
+export default async (
+  mainTable,
+  attributesTable,
+  metadata = defaultMetadata
+) => {
   // debugger;
   // const [balance, setBalance] = useState({ inWei: 0, formatted: 0 });
 
   // Prepare the metadata (handles all of the IPFS-related actions & JSON parsing).
   // const metadata = await prepareMetadata();
-  const metadata = [
-    {
-      id: 1,
-      name: "TableNFT Rigs #0",
-      description: "A Tableland NFT demo -- deploying metadata on Tableland",
-      image:
-        "https://bafkreibijrzbzy44dxmroq7jvbtka4oxgrejdtzsgu2qqsiugeb3he56pi.ipfs.nftstorage.link/",
-      attributes: [
-        {
-          trait_type: "Fleet",
-          value: "Foils",
-        },
-        {
-          trait_type: "Role",
-          value: "Admin",
-        },
-      ],
-    },
-  ];
 
   // An array to hold interpolated SQL INSERT statements, using the metadata object's values.
   const sqlInsertStatements = [];

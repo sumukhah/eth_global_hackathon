@@ -1,5 +1,6 @@
 import CreateCollection from "./CreateCollection/CreateCollection.jsx";
 import CreateTable from "./CreateTable/CreateTable.jsx";
-import UploadImages from "./UploadImages/UploadImages.jsx";
+import HomePage from "./HomePage/HomePage.jsx";
+import CollectionDetail from "./CollectionDetail/CollectionDetail.jsx";
 
-export { CreateCollection, CreateTable, UploadImages };
+export { CreateCollection, CreateTable, HomePage, CollectionDetail };

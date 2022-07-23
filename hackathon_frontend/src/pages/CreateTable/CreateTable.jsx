@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import "./CreateTable.css";
 
-import { Button, Form, Input, Upload, Typography } from "antd";
+import { Button, Form, Input, Upload, Typography, Alert, message } from "antd";
 import useCreateTable from "../../hooks/useCreateTable";
 import { InboxOutlined } from "@ant-design/icons";
 import firebase from "../../firebase/config";
@@ -13,7 +13,11 @@ import { db } from "../../firebase/config";
 import { getDatabase, ref, set } from "firebase/database";
 import web3 from "../../web3";
 import dropCollectionAbi from "../../abi/dropCollection.json";
+import Confetti from "react-confetti";
+// import useWindowSize from "react-use/lib/useWindowSize";
+
 // import nftContract from "../../web3/nftContract.js";
+import { create } from "ipfs-http-client";
 
 // import {
 //   useMoralisWeb3Api,
@@ -27,6 +31,7 @@ import nftAbi from "../../abi/nftc.json";
 import useNftContract from "../../hooks/useNftContract";
 import axios from "axios";
 
+const client = create("https://ipfs.infura.io:5001/api/v0");
 const { Dragger } = Upload;
 const { Title } = Typography;
 
@@ -66,6 +71,8 @@ export default function CreateTable() {
     mainTable: "",
     attributeTable: "",
   });
+  const [minted, setMinted] = useState([false, ""]);
+  const [nftData, setNftData] = useState({ images: [], metadata: [] });
 
   // const options = {
   //   abi: nftAbi,
@@ -119,6 +126,38 @@ export default function CreateTable() {
   //   }
   // };
 
+  const onImageUpload = async ({ fileList }) => {
+    const currentFiles = [...nftData.images];
+
+    for (const file of fileList) {
+      console.log(file, typeof file);
+      const added = await client.add(file.originFileObj);
+      const url = `https://ipfs.infura.io/ipfs/${added.path}`;
+      currentFiles.push(url);
+    }
+
+    setNftData({ ...nftData, images: currentFiles });
+  };
+
+  const onJsonUpload = ({ fileList }) => {
+    if (nftData.images.length < 1) {
+      message.error("Please upload atleast one image");
+      return <Confetti />;
+    }
+    const metadata = [...nftData.metadata];
+    for (const [i, jsonFile] of fileList.entries()) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const json = JSON.parse(e.target.result);
+        json.image = nftData.images[i];
+        json.id = i;
+        metadata.push(json);
+      };
+      reader.readAsText(jsonFile.originFileObj);
+    }
+    setNftData({ ...nftData, metadata });
+  };
+
   const submitForm = async (values) => {
     try {
       console.log("creating table");
@@ -138,12 +177,17 @@ export default function CreateTable() {
       console.log(attributeTableHash, attributeTableName, "attributeTableHash");
 
       console.log("writing table");
-      const sql = await prepareSqlStatement(mainTableName, attributeTableName);
+      const sql = await prepareSqlStatement(
+        mainTableName,
+        attributeTableName,
+        nftData.metadata
+      );
       const response = await writeTable(sql);
       await set(ref(db, "collections/" + collectionAddress), {
         owner: userWallet,
         address: collectionAddress,
         time: new Date().toISOString(),
+        coverImage: nftData.images[0],
         mainTable: { hash: mainTableHash, name: mainTableName },
         attributeTable: { hash: attributeTableHash, name: attributeTableName },
       });
@@ -177,7 +221,7 @@ export default function CreateTable() {
     try {
       collectionContract.methods
         .setBaseUri(tableNames.mainTable, tableNames.attributeTable)
-        .send({ from: userWallet });
+        .send({ from: userWallet, gas: "10000000", gasLimit: "8005758" });
 
       mint();
     } catch (e) {
@@ -189,12 +233,25 @@ export default function CreateTable() {
     try {
       const response = await collectionContract.methods
         .mint()
-        .send({ from: userWallet });
+        .send({ from: userWallet, gas: "10000000", gasLimit: "8005758" });
+      setMinted([true, response.transactionHash]);
       console.log(response, "response from mint");
     } catch (e) {
       console.log(e);
     }
   };
+  if (minted[0] === true) {
+    return (
+      <>
+        <Confetti width={1280} height={800}></Confetti>
+        <div className="collection-form-container">
+          <Typography.Title>Congratulations!</Typography.Title>
+          <h2>Your collection has been created!</h2>
+          <p>transaction hash: {minted[1]}</p>
+        </div>
+      </>
+    );
+  }
   return (
     <div className="collection-form-container">
       <Title className="collection-form-title" level={1}>
@@ -211,9 +268,34 @@ export default function CreateTable() {
         <Form.Item name="attributeTableName" label="Attribute Table name">
           <Input />
         </Form.Item>
-        {/* <Form.Item name="symbol" label="symbol">
-          <Input />
-        </Form.Item> */}
+
+        <Form.Item name="images" label="image files">
+          <Dragger multiple onChange={onImageUpload}>
+            <p className="ant-upload-drag-icon">
+              <InboxOutlined />
+            </p>
+            <p className="ant-upload-text">
+              Click or drag file to this area to upload
+            </p>
+            <p className="ant-upload-hint">
+              Supports for a single or bulk upload.
+            </p>
+          </Dragger>
+        </Form.Item>
+
+        <Form.Item name="attributes" label="metadata files">
+          <Dragger multiple onChange={onJsonUpload}>
+            <p className="ant-upload-drag-icon">
+              <InboxOutlined />
+            </p>
+            <p className="ant-upload-text">
+              Click or drag file to this area to upload
+            </p>
+            <p className="ant-upload-hint">
+              Supports for a single or bulk upload.
+            </p>
+          </Dragger>
+        </Form.Item>
 
         <Form.Item
           wrapperCol={{

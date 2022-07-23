@@ -1,2 +1,4 @@
 import walletContext from "./walletContext/walletContext.js";
-export { walletContext };
+import collectionContext from "./collectionContext/collectionContext.js";
+
+export { walletContext, collectionContext };

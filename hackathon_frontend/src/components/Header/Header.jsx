@@ -2,6 +2,8 @@ import React, { useContext, useEffect } from "react";
 import { WalletOutlined } from "@ant-design/icons";
 import "./Header.css";
 import { Button, Tooltip } from "antd";
+import { ReactComponent as LogoHead } from "./e1d14396a9918db5787d22c1accc187f.svg";
+import ethWing from "./ethWings.png";
 
 import { walletContext } from "../../context";
 import { Link } from "react-router-dom";
@@ -29,10 +31,9 @@ export default function Header(props) {
   return (
     <div className="page-container">
       <div className="header-container">
-        <div>
-          <span>icon</span>
-          <span></span>
-        </div>
+        <Link to="/">
+          <img src={ethWing} style={{ maxHeight: "40px" }} />
+        </Link>
         <div className="right-header-section">
           <Link to="/create-collection">Create collection</Link>
           <Button
