@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import "./CreateCollection.css";
 
-import { Button, Form, Input, Upload, Typography } from "antd";
+import { Button, Form, Input, Upload, Typography, Spin } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
 
 // import firebase from "../../firebase/config";
@@ -47,6 +47,7 @@ const formItemLayout = {
 export default function CreateCollection() {
   const { userWallet } = useContext(walletContext);
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   // const options = {
   //   abi: nftAbi,
@@ -122,6 +123,7 @@ export default function CreateCollection() {
       royaltyAddress,
       royaltyFees,
     } = values;
+    setIsLoading(true);
     const res = await nftContract.methods
       .createDropCollection(
         collectionName,
@@ -139,6 +141,7 @@ export default function CreateCollection() {
     //   time: new Date().toISOString(),
     // });
     console.log(collectionAddress, "collection address");
+    setIsLoading(false);
     return navigate("/create-table", { state: { collectionAddress } });
 
     // const res = await nftContract
@@ -168,6 +171,13 @@ export default function CreateCollection() {
       console.log(e);
     }
   };
+  if (isLoading) {
+    return (
+      <div className="spin-container">
+        <Spin size="large" />
+      </div>
+    );
+  }
   return (
     <div className="collection-form-container">
       <Title className="collection-form-title" level={1}>

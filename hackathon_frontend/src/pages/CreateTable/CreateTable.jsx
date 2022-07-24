@@ -60,6 +60,7 @@ export default function CreateTable() {
     createMainTable,
     initiateTableLand,
     tableConfig,
+    tableland,
   } = useCreateTable();
   const { userWallet } = useContext(walletContext);
   const location = useLocation();
@@ -164,9 +165,11 @@ export default function CreateTable() {
       let { mainTableHash, mainTableName } = await createMainTable(
         values.mainTableName
       );
+      message.info("Main table created successfully");
 
       let { attributeTableName, attributeTableHash } =
         await createAttributeTable(values.attributeTableName);
+      message.info("Attribute table created successfully");
 
       setTableNames({
         mainTable: mainTableName,
@@ -182,7 +185,7 @@ export default function CreateTable() {
         attributeTableName,
         nftData.metadata
       );
-      const response = await writeTable(sql);
+      const response = await writeTable(sql, tableland);
       await set(ref(db, "collections/" + collectionAddress), {
         owner: userWallet,
         address: collectionAddress,
@@ -191,6 +194,7 @@ export default function CreateTable() {
         mainTable: { hash: mainTableHash, name: mainTableName },
         attributeTable: { hash: attributeTableHash, name: attributeTableName },
       });
+      message.info("Data inserted to the Table successfully");
       const dropCollectionContract = new web3.eth.Contract(
         dropCollectionAbi,
         collectionAddress
@@ -236,6 +240,7 @@ export default function CreateTable() {
         .send({ from: userWallet, gas: "10000000", gasLimit: "8005758" });
       setMinted([true, response.transactionHash]);
       console.log(response, "response from mint");
+      message.success("Collection minted successfully");
     } catch (e) {
       console.log(e);
     }
@@ -248,6 +253,13 @@ export default function CreateTable() {
           <Typography.Title>Congratulations!</Typography.Title>
           <h2>Your collection has been created!</h2>
           <p>transaction hash: {minted[1]}</p>
+          <a
+            href={`https://mumbai.polygonscan.com/tx/${minted[1]}`}
+            target="_blank"
+            style={{ color: "blue" }}
+          >
+            Verify Link
+          </a>
         </div>
       </>
     );
@@ -312,7 +324,13 @@ export default function CreateTable() {
           <Button htmlType="submit">Submit</Button>
         </Form.Item>
       </Form>
-      <Button onClick={updateAndMint}>Update table name & mint</Button>
+      <Button
+        onClick={updateAndMint}
+        type="primary"
+        disabled={collectionContract === null}
+      >
+        Update table name & mint
+      </Button>
     </div>
   );
 }

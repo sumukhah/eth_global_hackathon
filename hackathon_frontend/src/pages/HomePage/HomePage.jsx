@@ -31,7 +31,7 @@ export default function HomePage() {
   //   const response = await writeTable(sql);
   //   console.log(response, "response");
   // };
-  if (collectionData.length === 0) {
+  if (collectionData?.length === 0 || !collectionData) {
     return (
       <div className="content-container">
         <Empty
@@ -39,11 +39,7 @@ export default function HomePage() {
           imageStyle={{
             height: 60,
           }}
-          description={
-            <span>
-              Customize <a href="#API">Description</a>
-            </span>
-          }
+          description={<span>Be the first to create a collection</span>}
         >
           <Link to="/create-collection">
             <Button type="primary">Create Now</Button>

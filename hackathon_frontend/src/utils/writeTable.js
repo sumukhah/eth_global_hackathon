@@ -1,11 +1,6 @@
 const { connect } = require("@tableland/sdk");
 
-const writeTable = async (sqlInsertStatements) => {
-  const tableland = await connect({
-    network: "testnet",
-    chain: "polygon-mumbai",
-  });
-
+const writeTable = async (sqlInsertStatements, tableland) => {
   console.log(`Writing metadata to tables...`);
   for await (let statement of sqlInsertStatements) {
     const { main, attributes } = statement;

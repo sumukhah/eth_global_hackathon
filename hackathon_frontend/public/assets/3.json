@@ -1,0 +1,15 @@
+{
+  "name": "Bored little apes Rigs #0",
+  "description": "A Bored little ape -- deploying metadata on Tableland",
+  "image": "",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "green"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Nick"
+    }
+  ]
+}
